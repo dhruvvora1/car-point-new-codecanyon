@@ -16,7 +16,7 @@ Route::get('/', function () {
 })->name('home');
 
 // Redirect authenticated users to appropriate dashboard
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth'])->group(function () {
     Route::get('dashboard', function () {
         $user = auth()->user();
 
@@ -34,7 +34,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 // Admin Routes
-Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
 
     // Seller Management
@@ -55,7 +55,7 @@ Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.'
 });
 
 // Seller Routes
-Route::middleware(['auth', 'verified', 'seller'])->prefix('seller')->name('seller.')->group(function () {
+Route::middleware(['auth', 'seller'])->prefix('seller')->name('seller.')->group(function () {
     Route::get('dashboard', [SellerDashboardController::class, 'index'])->name('dashboard');
 
     // Car Management
@@ -69,12 +69,12 @@ Route::middleware(['auth', 'verified', 'seller'])->prefix('seller')->name('selle
 });
 
 // Seller Pending Approval Route
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth'])->group(function () {
     Route::get('seller/pending-approval', [SellerDashboardController::class, 'pendingApproval'])->name('seller.pending-approval');
 });
 
 // Chat Routes (for both admin and approved sellers)
-Route::middleware(['auth', 'verified'])->prefix('chat')->name('chat.')->group(function () {
+Route::middleware(['auth'])->prefix('chat')->name('chat.')->group(function () {
     Route::get('/', [ChatController::class, 'index'])->name('index');
     Route::get('room/{chatRoom}', [ChatController::class, 'show'])->name('show');
     Route::post('room/{chatRoom}/send', [ChatController::class, 'sendMessage'])->name('send');

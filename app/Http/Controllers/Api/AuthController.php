@@ -53,6 +53,7 @@ class AuthController extends Controller
             'phone' => $request->phone,
             'is_approved' => $request->role === User::ROLE_ADMIN ? true : false,
             'is_active' => true,
+            'email_verified_at' => now(), // Auto-verify email
         ]);
 
         $token = $user->createToken('api-token')->plainTextToken;

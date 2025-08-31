@@ -133,9 +133,9 @@ export default function PendingApproval() {
                                 </div>
                                 
                                 <div>
-                                    <p className="font-medium">Email Verification</p>
-                                    <Badge variant={user.email_verified_at ? "default" : "destructive"} className="mt-1">
-                                        {user.email_verified_at ? 'Verified' : 'Not Verified'}
+                                    <p className="font-medium">Account Type</p>
+                                    <Badge variant="default" className="mt-1">
+                                        {user.role === 'admin' ? 'Administrator' : 'Seller'}
                                     </Badge>
                                 </div>
                                 

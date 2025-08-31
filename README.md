@@ -192,7 +192,7 @@ Admin users can access:
 
 - JWT-based authentication with Laravel Sanctum
 - Role-based access control
-- Email verification for sellers
+- Auto-verified email addresses (no verification required)
 - CSRF protection
 - Input validation and sanitization
 - File upload security
