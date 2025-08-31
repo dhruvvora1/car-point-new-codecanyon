@@ -101,8 +101,8 @@ class ChatController extends Controller
         // Update chat room timestamp
         $chatRoom->touch();
 
-        // Here you would broadcast the message via WebSocket
-        // broadcast(new MessageSent($message))->toOthers();
+        // Broadcast the message via Pusher
+        broadcast(new \App\Events\MessageSent($message))->toOthers();
 
         return response()->json([
             'message' => $message,

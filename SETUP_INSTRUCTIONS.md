@@ -56,13 +56,13 @@ DB_DATABASE=carpoint
 DB_USERNAME=root
 DB_PASSWORD=your_password
 
-BROADCAST_CONNECTION=pusher
-PUSHER_APP_ID=carpoint
-PUSHER_APP_KEY=carpoint-key
-PUSHER_APP_SECRET=carpoint-secret
-PUSHER_HOST=127.0.0.1
-PUSHER_PORT=6001
-PUSHER_SCHEME=http
+BROADCAST_CONNECTION=log
+# For production, use Pusher:
+# BROADCAST_CONNECTION=pusher
+# PUSHER_APP_ID=your-pusher-app-id
+# PUSHER_APP_KEY=your-pusher-key
+# PUSHER_APP_SECRET=your-pusher-secret
+# PUSHER_APP_CLUSTER=mt1
 
 MAIL_MAILER=smtp
 MAIL_HOST=your-smtp-host
@@ -118,8 +118,7 @@ composer run dev
 This will start:
 - Laravel development server (http://localhost:8000)
 - Vite development server (for hot reloading)
-- WebSocket server (for real-time chat)
-- Queue worker (for background jobs)
+- Queue worker (for real-time features)
 
 ### Manual Start
 
@@ -132,10 +131,7 @@ php artisan serve
 # Terminal 2: Frontend development
 npm run dev
 
-# Terminal 3: WebSocket server
-php artisan websockets:serve
-
-# Terminal 4: Queue worker
+# Terminal 3: Queue worker (for real-time features)
 php artisan queue:work
 ```
 
@@ -154,7 +150,6 @@ You can register a new seller account through the registration form. Seller acco
 - **Main Application**: http://localhost:8000
 - **Admin Dashboard**: http://localhost:8000/admin/dashboard
 - **Seller Dashboard**: http://localhost:8000/seller/dashboard
-- **WebSocket Dashboard**: http://localhost:8000/laravel-websockets (admin only)
 
 ## Troubleshooting
 
@@ -180,10 +175,10 @@ You can register a new seller account through the registration form. Seller acco
    icacls bootstrap\cache /grant Everyone:F /T
    ```
 
-4. **WebSocket Connection Issues**
-   - Ensure port 6001 is not blocked by firewall
-   - Check WebSocket server is running
-   - Verify Pusher configuration in `.env`
+4. **Real-time Chat Issues**
+   - For development: Set `BROADCAST_CONNECTION=log` in `.env`
+   - For production: Configure Pusher credentials in `.env`
+   - Ensure queue worker is running: `php artisan queue:work`
 
 5. **File Upload Issues**
    - Ensure storage link is created: `php artisan storage:link`
@@ -279,22 +274,18 @@ server {
 
 ### 4. Process Management
 
-Use a process manager like Supervisor to keep services running:
+Use a process manager like Supervisor to keep the queue worker running:
 
 ```ini
-[program:carpoint-websockets]
-command=php artisan websockets:serve
-directory=/var/www/carpoint
-autostart=true
-autorestart=true
-user=www-data
-
 [program:carpoint-queue]
-command=php artisan queue:work --sleep=3 --tries=3
+command=php artisan queue:work --sleep=3 --tries=3 --max-time=3600
 directory=/var/www/carpoint
 autostart=true
 autorestart=true
 user=www-data
+numprocs=1
+redirect_stderr=true
+stdout_logfile=/var/www/carpoint/storage/logs/queue.log
 ```
 
 ## Security Checklist

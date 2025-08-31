@@ -18,16 +18,16 @@ A full-stack car marketplace web application built with Laravel 12 and React.js,
 - **Real-time Chat**: One-to-one and group chat with other sellers and admin
 
 ### Real-time Features
-- **WebSocket Chat**: Instant messaging with Socket.IO
+- **Real-time Chat**: Instant messaging with Pusher
 - **Live Notifications**: Real-time updates for approvals, messages, and activities
-- **Online Status**: See who's online in chat rooms
+- **Broadcasting**: Event-driven real-time updates
 
 ## 🛠️ Tech Stack
 
 - **Backend**: Laravel 12, MySQL, Laravel Sanctum
 - **Frontend**: React.js, TypeScript, Inertia.js
 - **UI**: Tailwind CSS, Radix UI Components
-- **Real-time**: Laravel WebSockets, Socket.IO
+- **Real-time**: Pusher, Laravel Echo
 - **File Storage**: Laravel Storage (configurable for S3)
 
 ## 📋 Prerequisites
@@ -88,11 +88,14 @@ A full-stack car marketplace web application built with Laravel 12 and React.js,
    php artisan vendor:publish --provider="Laravel\Sanctum\SanctumServiceProvider"
    ```
 
-9. **Install WebSockets (Optional for real-time chat)**
+9. **Configure Broadcasting (for real-time chat)**
    ```bash
-   php artisan vendor:publish --provider="BeyondCode\LaravelWebSockets\WebSocketsServiceProvider" --tag="migrations"
-   php artisan migrate
-   php artisan vendor:publish --provider="BeyondCode\LaravelWebSockets\WebSocketsServiceProvider" --tag="config"
+   php artisan vendor:publish --provider="Laravel\Sanctum\SanctumServiceProvider"
+   ```
+
+   Update your `.env` file with Pusher credentials or use log driver for development:
+   ```env
+   BROADCAST_CONNECTION=log  # Use 'pusher' for production
    ```
 
 ## 🚀 Running the Application
@@ -107,12 +110,7 @@ A full-stack car marketplace web application built with Laravel 12 and React.js,
    npm run dev
    ```
 
-3. **Start WebSocket server (for real-time chat)**
-   ```bash
-   php artisan websockets:serve
-   ```
-
-4. **Start queue worker (for background jobs)**
+3. **Start queue worker (for real-time features)**
    ```bash
    php artisan queue:work
    ```
@@ -217,9 +215,10 @@ Admin users can access:
    - Set up file storage (S3 recommended)
    - Configure mail settings for notifications
 
-3. **WebSocket deployment**
-   - Use Laravel WebSockets or external service like Pusher
-   - Configure SSL for secure WebSocket connections
+3. **Real-time features deployment**
+   - Configure Pusher credentials for production
+   - Set up queue worker for event broadcasting
+   - Configure SSL for secure connections
 
 ## 🧪 Testing
 

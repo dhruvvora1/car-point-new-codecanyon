@@ -4,9 +4,8 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { Badge } from './ui/badge';
-import { Send, Image, Car, MoreVertical } from 'lucide-react';
+import { Send, Image, Car, RefreshCw } from 'lucide-react';
 import { useForm, router } from '@inertiajs/react';
-import { useEcho } from '@/hooks/useEcho';
 
 interface Message {
     id: number;
@@ -41,21 +40,21 @@ interface ChatRoom {
     }>;
 }
 
-interface ChatInterfaceProps {
+interface SimpleChatInterfaceProps {
     chatRoom: ChatRoom;
     messages: Message[];
     currentUser: any;
 }
 
-export default function ChatInterface({ chatRoom, messages, currentUser }: ChatInterfaceProps) {
+export default function SimpleChatInterface({ chatRoom, messages, currentUser }: SimpleChatInterfaceProps) {
     const [newMessage, setNewMessage] = useState('');
     const [selectedImage, setSelectedImage] = useState<File | null>(null);
     const [chatMessages, setChatMessages] = useState(messages);
+    const [isRefreshing, setIsRefreshing] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const { post, processing } = useForm();
-    const { isConnected, listenForMessage } = useEcho();
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -69,14 +68,22 @@ export default function ChatInterface({ chatRoom, messages, currentUser }: ChatI
         setChatMessages(messages);
     }, [messages]);
 
-    // Listen for new messages via Echo
+    // Auto-refresh messages every 5 seconds
     useEffect(() => {
-        if (isConnected) {
-            listenForMessage(`chat-room.${chatRoom.id}`, 'MessageSent', (data: any) => {
-                setChatMessages(prev => [...prev, data.message]);
-            });
-        }
-    }, [isConnected, chatRoom.id]);
+        const interval = setInterval(() => {
+            refreshMessages();
+        }, 5000);
+
+        return () => clearInterval(interval);
+    }, []);
+
+    const refreshMessages = () => {
+        setIsRefreshing(true);
+        router.reload({
+            only: ['messages'],
+            onFinish: () => setIsRefreshing(false),
+        });
+    };
 
     const handleSendMessage = (e: React.FormEvent) => {
         e.preventDefault();
@@ -99,6 +106,8 @@ export default function ChatInterface({ chatRoom, messages, currentUser }: ChatI
                 if (fileInputRef.current) {
                     fileInputRef.current.value = '';
                 }
+                // Refresh messages after sending
+                setTimeout(refreshMessages, 500);
             },
         });
     };
@@ -132,6 +141,14 @@ export default function ChatInterface({ chatRoom, messages, currentUser }: ChatI
                         </Badge>
                     </CardTitle>
                     <div className="flex items-center space-x-2">
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={refreshMessages}
+                            disabled={isRefreshing}
+                        >
+                            <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+                        </Button>
                         {chatRoom.participants.slice(0, 3).map((participant) => (
                             <Avatar key={participant.id} className="h-8 w-8">
                                 <AvatarImage src={participant.avatar} />

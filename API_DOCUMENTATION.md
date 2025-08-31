@@ -293,42 +293,60 @@ API endpoints are rate limited:
 - General API endpoints: 60 requests per minute
 - Chat endpoints: 100 requests per minute
 
-## WebSocket Events
+## Real-time Events (Pusher/Laravel Echo)
 
 ### Chat Events
-- `message.sent` - New message in chat room
-- `user.online` - User came online
-- `user.offline` - User went offline
-- `typing.start` - User started typing
-- `typing.stop` - User stopped typing
+- `MessageSent` - New message in chat room
+- `UserOnline` - User came online (future enhancement)
+- `UserOffline` - User went offline (future enhancement)
 
 ### Admin Events
-- `seller.approved` - Seller account approved
-- `seller.rejected` - Seller account rejected
-- `car.featured` - Car marked as featured
+- `SellerApproved` - Seller account approved
+- `SellerRejected` - Seller account rejected
+- `CarFeatured` - Car marked as featured
 
-### Example WebSocket Usage (JavaScript)
+### Example Laravel Echo Usage (JavaScript)
 ```javascript
-import { io } from 'socket.io-client';
+import Echo from 'laravel-echo';
+import Pusher from 'pusher-js';
 
-const socket = io('http://localhost:6001', {
+window.Pusher = Pusher;
+
+const echo = new Echo({
+    broadcaster: 'pusher',
+    key: process.env.VITE_PUSHER_APP_KEY,
+    cluster: process.env.VITE_PUSHER_APP_CLUSTER,
+    forceTLS: true,
+    authEndpoint: '/broadcasting/auth',
     auth: {
-        token: 'your-bearer-token'
-    }
+        headers: {
+            'Authorization': `Bearer ${authToken}`,
+        },
+    },
 });
 
-// Join a chat room
-socket.emit('join-room', chatRoomId);
+// Listen for new messages in a chat room
+echo.private(`chat-room.${chatRoomId}`)
+    .listen('MessageSent', (data) => {
+        console.log('New message:', data.message);
+    });
 
-// Listen for new messages
-socket.on('message.sent', (data) => {
-    console.log('New message:', data.message);
-});
+// Leave the channel when done
+echo.leaveChannel(`chat-room.${chatRoomId}`);
+```
 
-// Send a message
-socket.emit('send-message', {
-    room_id: chatRoomId,
-    message: 'Hello!',
-    type: 'text'
-});
+### Development Mode
+For development, you can use the log driver which will log events instead of broadcasting:
+```env
+BROADCAST_CONNECTION=log
+```
+
+### Production Mode
+For production, configure Pusher credentials:
+```env
+BROADCAST_CONNECTION=pusher
+PUSHER_APP_ID=your-app-id
+PUSHER_APP_KEY=your-app-key
+PUSHER_APP_SECRET=your-app-secret
+PUSHER_APP_CLUSTER=mt1
 ```

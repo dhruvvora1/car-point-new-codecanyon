@@ -1,7 +1,7 @@
 import React from 'react';
 import { Head } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
-import ChatInterface from '@/components/ChatInterface';
+import SimpleChatInterface from '@/components/SimpleChatInterface';
 
 interface Message {
     id: number;
@@ -55,7 +55,7 @@ export default function ChatShow({ chatRoom, messages, auth }: ChatShowProps) {
                     <p className="text-gray-600">{chatRoom.name}</p>
                 </div>
 
-                <ChatInterface
+                <SimpleChatInterface
                     chatRoom={chatRoom}
                     messages={messages}
                     currentUser={auth.user}
